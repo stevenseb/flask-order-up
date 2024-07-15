@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+    <title>Daily Calendar</title>
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="calendar">
+            <div class="calendar-header">
+                <button class="nav-button" onclick="location.href='{{ url_for('.daily', year=previous_day.year, month=previous_day.month, day=previous_day.day) }}'">←</button>
+                <h2>{{ current_date.strftime('%A, %B %d, %Y') }}</h2>
+                <button class="nav-button" onclick="location.href='{{ url_for('.daily', year=next_day.year, month=next_day.month, day=next_day.day) }}'">→</button>
+            </div>
+            <div class="calendar-body">
+                {% for hour in range(24) %}
+                    <div class="calendar-time">{{ '%02d:00'|format(hour) }}</div>
+                    <div class="calendar-hour" onclick="showFormModal('{{ current_date.year }}', '{{ current_date.month }}', '{{ current_date.day }}', '{{ hour }}')">
+                        {% for appointment in appointments %}
+                            {% if appointment[2].hour == hour %}
+                                <div class="calendar-appointment" style="height: {{ (appointment[3] - appointment[2]).seconds / 3600 * 100 }}%;" onclick="showModal(event, '{{ appointment[0] }}', '{{ appointment[1] }}', '{{ appointment[2].strftime('%Y-%m-%d') }}', '{{ appointment[2].strftime('%H:%M') }}', '{{ appointment[3].strftime('%Y-%m-%d') }}', '{{ appointment[3].strftime('%H:%M') }}', '{{ appointment[4] }}')" title="{{ appointment[4] }}">
+                                    {{ appointment[1] }}, {{ appointment[2].strftime('%I:%M %p') }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title"></h2>
+            <p><strong>Start Time:</strong> <span id="modal-start-time"></span></p>
+            <p><strong>End Time:</strong> <span id="modal-end-time"></span></p>
+            <p><strong>Description:</strong> <span id="modal-description"></span></p>
+            <button onclick="deleteAppointment()">Delete</button>
+            <button onclick="editAppointment()">Edit</button>
+        </div>
+    </div>
+
+    <!-- Form Modal -->
+    <div id="formModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeFormModal()">&times;</span>
+            <h2>New Appointment</h2>
+            <form id="appointmentForm" method="POST">
+                {{ form.hidden_tag() }}
+                <p>
+                    {{ form.name.label }}<br>
+                    {{ form.name(id="form_name", size=32) }}<br>
+                    {% if form.name.errors %}
+                        <span style="color: red;">{{ form.name.errors[0] }}</span>
+                    {% endif %}
+                </p>
+                <p>
+                    {{ form.start_date.label }}<br>
+                    {{ form.start_date(id="start_date") }} {{ form.start_time(id="start_time") }}<br>
+                    {% if form.start_date.errors %}
+                        <span style="color: red;">{{ form.start_date.errors[0] }}</span>
+                    {% endif %}
+                </p>
+                <p>
+                    {{ form.end_date.label }}<br>
+                    {{ form.end_date(id="end_date") }} {{ form.end_time(id="end_time") }}<br>
+                    {% if form.end_date.errors %}
+                        <span style="color: red;">{{ form.end_date.errors[0] }}</span>
+                    {% endif %}
+                </p>
+                <p>
+                    {{ form.description.label }}<br>
+                    {{ form.description(id="form_description", rows=5, cols=40) }}<br>
+                    {% if form.description.errors %}
+                        <span style="color: red;">{{ form.description.errors[0] }}</span>
+                    {% endif %}
+                </p>
+                <p>
+                    {{ form.private(id="form_private") }} {{ form.private.label }}
+                </p>
+                <p>{{ form.submit() }}</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Link to the JavaScript file -->
+    <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+    <!-- Include LiveReload script -->
+    <script src="http://127.0.0.1:35729/livereload.js?snipver=1"></script>
+</body>
+</html>

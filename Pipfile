@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+python-dotenv = "*"
+jsmin = "*"
+flask-socketio = "*"
+cssmin = "*"
+watchdog = "*"
+flask-assets = "*"
+flask-wtf = "*"
+sqlalchemy = "*"
+flask-sqlalchemy = "*"
+wtforms = "*"
+flask-login = "*"
+werkzeug = "==2.3"
+
+[dev-packages]
+pylint = "*"
+pycodestyle = "*"
+rope = "*"
+
+[requires]
+python_version = "3.9"
