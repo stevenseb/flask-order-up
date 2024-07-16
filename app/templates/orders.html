@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="left-section">
+        <h1>Order Up!</h1>
+        <p>You can place orders here</p>
+        <!-- Table Assignment Form -->
+        <form method="POST" action="{{ url_for('orders.index') }}">
+            {{ table_form.hidden_tag() }} <!-- This includes the hidden CSRF token within the form -->
+            <div>
+                {{ table_form.tables.label }} {{ table_form.tables() }}
+            </div>
+            <div>
+                {{ table_form.servers.label }} {{ table_form.servers() }}
+            </div>
+            <div>
+                {{ table_form.assign(class="button") }}
+            </div>
+        </form>
+        {% if not current_user.is_anonymous %}
+            <form method="POST" action="{{ url_for('session.logout') }}" class="logout-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="button">Logout</button>
+            </form>
+        {% endif %}
+    </div>
+    <div class="right-section">
+        <h2>Your Open Orders</h2>
+        {% if open_orders %}
+            <ul>
+                {% for order in open_orders %}
+                    <li class="order-item">
+                        <div>
+                            Order #{{ order.id }} for Table {{ order.table.number }} - ${{ order.total_price }}
+                            <form method="POST" action="{{ url_for('orders.close_order', order_id=order.id) }}" class="close-button">
+                                {{ menu_form.hidden_tag() }} <!-- This includes the hidden CSRF token within the form -->
+                                <button type="submit" class="button">Close Table</button>
+                            </form>
+                        </div>
+                        <ul>
+                            {% for item in order.items %}
+                                <li>
+                                    {{ item.menu_item.name }} x {{ item.quantity }} - ${{ item.menu_item.price * item.quantity }}
+                                    <form method="POST" action="{{ url_for('orders.remove_item', order_item_id=item.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="button">Remove</button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <form method="POST" action="{{ url_for('orders.add_items', order_id=order.id) }}">
+                            {{ menu_form.hidden_tag() }} <!-- This includes the hidden CSRF token within the form -->
+                            <div>
+                                {% for item in menu_items %}
+                                    <div>
+                                        <input type="checkbox" name="menu_item_ids" value="{{ item.id }}" id="item-{{ item.id }}">
+                                        <label for="item-{{ item.id }}">{{ item.name }} - ${{ item.price }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="button">Add to Order</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Currently, there are no orders.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

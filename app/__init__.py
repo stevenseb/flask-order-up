@@ -1,41 +1,25 @@
-import os
 from flask import Flask
-from livereload import Server
-from app import routes
-from app.assets import compile_assets
+from flask_login import LoginManager
+from flask_wtf import CSRFProtect
+from .config import Config
+from .models import db, Employee
+from .routes import orders, session 
 
 app = Flask(__name__)
-app.config.update({'SECRET_KEY': os.environ.get('SECRET_KEY')})
-app.register_blueprint(routes.bp)
+app.config.from_object(Config)
+db.init_app(app)
 
-# Compile static assets
-compile_assets(app)
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
 
-if __name__ == "__main__":
-    # Create a LiveReload server
-    server = Server(app.wsgi_app)
-    
-    # Watch for changes in the static and templates directories
-    server.watch('app/static/js/*.*')
-    server.watch('app/static/css/*.*')
-    server.watch('app/templates/*.*')
+# Register blueprints
+app.register_blueprint(orders.bp)
+app.register_blueprint(session.bp)
 
-    # Watch for changes in Python files
-    server.watch('app/routes.py')
-    server.watch('app/__init__.py')
-    server.watch('app/assets.py')
-    server.watch('app.py')
-    
-    # Use watchdog to monitor changes in Python files
-    import subprocess
-    def restart_server():
-        subprocess.call(['pkill', '-f', 'flask run'])
-        subprocess.call(['flask', 'run'])
+# Initialize LoginManager
+login = LoginManager(app)
+login.login_view = "session.login"
 
-    server.watch('app/routes.py', restart_server)
-    server.watch('app/__init__.py', restart_server)
-    server.watch('app/assets.py', restart_server)
-    server.watch('app.py', restart_server)
-    
-    # Start the server
-    server.serve(port=5000, host='127.0.0.1', open_url=True)
+@login.user_loader
+def load_user(id):
+    return Employee.query.get(int(id))

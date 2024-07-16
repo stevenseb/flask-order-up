@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% if title %}
+        <title>{{ title }} - Order Up!</title>
+    {% else %}
+        <title>Welcome to Order Up!</title>
+    {% endif %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    {% if not current_user.is_anonymous and show_logout is not defined %}
+        <form method="POST" action="{{ url_for('session.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="button">Logout</button>
+        </form>
+    {% endif %}
+    {% block content %}{% endblock %}
+</body>
+</html>

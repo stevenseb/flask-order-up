@@ -1,36 +1,17 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, TimeField, TextAreaField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, ValidationError
-from datetime import datetime
+from wtforms import StringField, PasswordField, SubmitField, SelectField, SelectMultipleField
+from wtforms.validators import DataRequired
 
-class AppointmentForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    start_date = DateField('Start Date', format='%Y-%m-%d', validators=[DataRequired()])
-    start_time = TimeField('Start Time', format='%H:%M', validators=[DataRequired()])
-    end_date = DateField('End Date', format='%Y-%m-%d', validators=[DataRequired()])
-    end_time = TimeField('End Time', format='%H:%M', validators=[DataRequired()])
-    description = TextAreaField('Description', validators=[DataRequired()])
-    private = BooleanField('Private')
-    submit = SubmitField('Submit')
-    
-    def validate_start_date(self, field):
-        start = datetime.combine(self.start_date.data, self.start_time.data)
-        if start <= datetime.now():
-            raise ValidationError("Start date/time must be in the future")
-        
-    def validate_end_date(self, field):
-        start = datetime.combine(self.start_date.data, self.start_time.data)
-        end = datetime.combine(self.end_date.data, self.end_time.data)
-        if start >= end:
-            raise ValidationError("End date/time must come after start date/time")
-    
-    def validate_start_time(self, field):
-        start = datetime.combine(self.start_date.data, self.start_time.data)
-        if start <= datetime.now():
-            raise ValidationError("Start date/time must be in the future")
-    
-    def validate_end_time(self, field):
-        start = datetime.combine(self.start_date.data, self.start_time.data)
-        end = datetime.combine(self.end_date.data, self.end_time.data)
-        if end <= start:
-            raise ValidationError("End date/time must come after start date/time")
+class LoginForm(FlaskForm):
+    employee_number = StringField("Employee number", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Login")
+
+class TableAssignmentForm(FlaskForm):
+    tables = SelectField("Tables", coerce=int, validators=[DataRequired()])
+    servers = SelectField("Servers", coerce=int, validators=[DataRequired()])
+    assign = SubmitField("Assign")
+
+class MenuItemAssignmentForm(FlaskForm):
+    menu_item_ids = SelectMultipleField("Menu items", coerce=int, validators=[DataRequired()])
+    add = SubmitField("Add to order")
